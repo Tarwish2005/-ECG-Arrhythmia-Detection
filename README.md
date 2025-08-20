@@ -1,91 +1,65 @@
-# ECG Arrhythmia Classification using 1D CNN
+# ECG Arrhythmia Detection
 
-This project implements a **1D Convolutional Neural Network (CNN)** in PyTorch to classify ECG signals into three categories:  
+This project implements an end-to-end pipeline for ECG arrhythmia detection using deep learning. It leverages several public ECG databases and a 1D CNN model for classification.
 
-- **Normal Sinus Rhythm (Class 0)**  
-- **Ventricular Tachycardia/Fibrillation (VT/VF, Class 1)**  
-- **Noise (Class 2)**  
+## Features
 
-The model is trained on a **composite dataset aggregated from four PhysioNet databases**, ensuring robustness and generalization for real-world ECG monitoring.  
+- Loads and preprocesses ECG data from multiple databases:
+  - MIT-BIH Arrhythmia Database (MITDB)
+  - VFDB (Ventricular Fibrillation Database)
+  - CUVTDB
+  - NSTDB (Noise Stress Test Database)
+- Segments and normalizes ECG signals
+- Trains a 1D CNN for arrhythmia classification
+- Visualizes training progress (loss and accuracy)
 
----
+## Requirements
 
-## 📋 Table of Contents
-- [Project Overview](#-project-overview)  
-- [Methodology](#-methodology)  
-  - [Data Preprocessing](#data-preprocessing)  
-  - [Model Architecture](#model-architecture)  
-- [Datasets](#-datasets)  
-- [Getting Started](#-getting-started)  
-  - [Prerequisites](#prerequisites)  
-  - [Installation](#installation)  
-  - [Usage](#usage)  
-- [Results](#-results)  
-- [Contributing](#-contributing)  
-- [License](#-license)  
+- Python 3.7+
+- [wfdb](https://pypi.org/project/wfdb/)
+- numpy
+- scipy
+- scikit-learn
+- torch
+- torchaudio
+- torchvision
+- matplotlib
+- seaborn
 
----
+Install dependencies with:
 
-## 📖 Project Overview
-The primary goal is to **detect life-threatening ventricular arrhythmias (VT/VF)** and differentiate them from:  
-1. Normal heart rhythms, and  
-2. Noisy/corrupted signals (a common issue in clinical ECG monitoring).  
+```sh
+pip install wfdb numpy scipy scikit-learn torch torchaudio torchvision matplotlib seaborn
+```
 
-The workflow includes:  
-- Loading and preprocessing raw ECG waveform data  
-- Defining a **custom 1D CNN** architecture for time-series classification  
-- Training and validating the model  
-- Visualizing performance (loss/accuracy curves)  
+## Usage
 
----
+1. **Prepare Data**  
+   Place the ECG databases in your workspace and update the paths in `ECG-Arrhythmia-Detection.ipynb`:
+   - `VFDB_DIR`
+   - `CUVTDB_DIR`
+   - `ADB_DIR` (MITDB)
+   - `NSTDB_DIR`
 
-## 🛠️ Methodology
+2. **Run the Notebook**  
+   Open `ECG-Arrhythmia-Detection.ipynb` in Jupyter or VS Code and execute the cells.
 
-### Data Preprocessing
-All ECG signals undergo a series of steps for consistency:  
-- **Resampling** → All signals resampled to **250 Hz**  
-- **Filtering** → High-pass Butterworth filter to remove baseline wander  
-- **Normalization** → Z-score normalization (zero mean, unit variance)  
-- **Segmentation** → Signals segmented into **5-second windows** (1250 samples each)  
+3. **Training**  
+   The notebook will:
+   - Load and preprocess ECG data
+   - Train a CNN model
+   - Plot training/validation loss and accuracy
 
-### Model Architecture
-A **5-layer 1D CNN** captures temporal features from ECG signals.  
+## File Structure
 
-- **Input Layer**: `(batch_size, 1, 1250)`  
-- **Conv Blocks (x5)**:  
-  - `Conv1d (kernel=3)` → `BatchNorm1d` → `ReLU` → `MaxPool1d`  
-- **Fully Connected Layers**:  
-  - Flatten → Dense Layers with `ReLU` + Dropout (0.5, 0.3)  
-- **Output Layer**: 3 neurons for classification  
-  - **0** → Normal Rhythm  
-  - **1** → VT/VF  
-  - **2** → Noise  
+- `ECG-Arrhythmia-Detection.ipynb`: Main notebook with all code
+- `MITDB/`, `VFDB/`, `CUVTDB/`, `NSTDB/`: ECG database directories
 
----
+## Model
 
-## 📚 Datasets
-Training combines four **PhysioNet** databases:  
+The model is a 5-layer 1D CNN implemented in PyTorch ([`ECG_CNN`](ECG-Arrhythmia-Detection.ipynb)).  
+It takes 5-second ECG segments and classifies them into three classes:
+- Non-VT/VF
+- VT/VF
+- Noisy
 
-| Database | Variable | Purpose | Class Label |
-|----------|----------|---------|-------------|
-| MIT-BIH Arrhythmia Database | `ADB_DIR` | Normal rhythms & other arrhythmias | 0 |
-| Malignant Ventricular Ectopy Database | `VFDB_DIR` | Life-threatening VT/VF | 1 |
-| Creighton Univ. Ventricular Tachyarrhythmia DB | `CUVTDB_DIR` | Extra VT/VF examples | 1 |
-| MIT-BIH Noise Stress Test DB | `NSTDB_DIR` | Realistic noise artifacts | 2 |  
-
-📌 **Note**: All datasets are publicly available on [PhysioNet](https://physionet.org).  
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python **3.7+**  
-- PyTorch  
-- CUDA-enabled GPU (recommended)  
-
-### Installation
-Clone the repository:  
-```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
